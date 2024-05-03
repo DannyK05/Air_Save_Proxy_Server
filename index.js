@@ -1,6 +1,7 @@
 const express = require('express');
 const axios = require('axios');
 require('dotenv').config(); // Load environment variables from .env file
+const { GoogleGenerativeAI } = require("@google/generative-ai"); // Load the Gemini model
 
 const app = express();
 const port = process.env.PORT || 3000; // Use port from environment or default to 3000
@@ -22,6 +23,8 @@ app.use((req, res, next) => {
 });
 
 // Proxy endpoint
+
+//Google air quality API endpoint 
 app.get('/aqi', async (req, res) => {
     try {
         const { latitude, longitude } = req.query;
@@ -39,7 +42,27 @@ app.get('/aqi', async (req, res) => {
         res.status(500).send('Failed to fetch AQI data');
     }
 });
+ //Google Gemini API endpoint
+ const genAI = new GoogleGenerativeAI(process.env.AI_API_KEY);
+ const model = genAI.getGenerativeModel({ model: "gemini-pro"});
 
+ app.get("/gemini", async (req, res) => {
+    try{
+    const {prompt} = req.query;
+    async function run() {
+        const result = await model.generateContent(prompt);
+        const response = result.response;
+        const text = response.text ? await response.text() : "No text returned";
+        res.send(text);
+        console.log(text);
+      }
+      run();
+    }
+    catch(error){
+        console.error('API request failed:', error);
+        res.status(500).send('Failed to fetch AQI data').json({ error: 'Failed to generate content', details: error.message });
+    }
+ }) 
 // Start the server
 app.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
