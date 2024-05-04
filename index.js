@@ -24,24 +24,7 @@ app.use((req, res, next) => {
 
 // Proxy endpoint
 
-//Google air quality API endpoint 
-app.get('/aqi', async (req, res) => {
-    try {
-        const { latitude, longitude } = req.query;
-        const response = await axios.get(`https://airquality.googleapis.com/v1/currentConditions:lookup?key=${process.env.AQI_API_KEY}`, {
-            params: {
-                location: {
-                    latitude,
-                    longitude
-                }
-            }
-        });
-        res.json(response.data);
-    } catch (error) {
-        console.error('API request failed:', error);
-        res.status(500).send('Failed to fetch AQI data');
-    }
-});
+
  //Google Gemini API endpoint
  const genAI = new GoogleGenerativeAI(process.env.AI_API_KEY);
  const model = genAI.getGenerativeModel({ model: "gemini-pro"});
